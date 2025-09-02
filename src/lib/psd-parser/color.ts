@@ -9,6 +9,8 @@ export function normalizeColorFloatValue(value: number): number {
 }
 
 export function parseColor(color: VectorObjectTypeItem): Color | null {
+  if (!color) return null;
+
   const redItem = color.descriptor.items.get("Rd  ") as VectorNumberTypeItem;
   const greenItem = color.descriptor.items.get("Grn ") as VectorNumberTypeItem;
   const blueItem = color.descriptor.items.get("Bl  ") as VectorNumberTypeItem;
