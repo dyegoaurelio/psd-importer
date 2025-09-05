@@ -81,6 +81,11 @@ const FlagDefaults: Flags = {
 interface Options {
   fontResolver: TypefaceResolver;
   flags: Flags;
+  /**
+   * Converts image Blobs to URI strings for CE.SDK blocks.
+   * Defaults to URL.createObjectURL.
+   */
+  blobToUriConverter: (blob: Blob) => string | Promise<string>;
 }
 
 export class PSDParser {
@@ -95,6 +100,7 @@ export class PSDParser {
   private encodeBufferToPNG: EncodeBufferToPNG;
   private flags: Flags;
   private groups: Map<number, number[]>;
+  private blobToUriConverter: Options["blobToUriConverter"];
 
   private constructor(
     engine: CreativeEngine,
@@ -115,6 +121,7 @@ export class PSDParser {
     this.encodeBufferToPNG = encodeBufferToPNG!;
     this.flags = options.flags ?? FlagDefaults;
     this.groups = new Map<number, number[]>();
+    this.blobToUriConverter = options.blobToUriConverter ?? URL.createObjectURL;
   }
 
   static async fromFile(
@@ -1380,7 +1387,7 @@ export class PSDParser {
       bgColor
     );
 
-    const imageURI = URL.createObjectURL(imgBlob);
+    const imageURI = await this.blobToUriConverter(imgBlob);
 
     const imageBlock = this.engine.block.create("//ly.img.ubq/graphic");
     const rectFrame = this.engine.block.createShape("//ly.img.ubq/shape/rect");
@@ -1514,7 +1521,7 @@ export class PSDParser {
         bgColor
       );
 
-      const imageURI = URL.createObjectURL(imgBlob);
+      const imageURI = await this.blobToUriConverter(imgBlob);
 
       // set fill
       const fillType = this.engine.block.createFill("//ly.img.ubq/fill/image");
